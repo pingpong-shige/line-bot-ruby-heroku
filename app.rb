@@ -10,9 +10,9 @@ def client
 end
 
 def get_user_local_bot_reply(word)
-  response = RestClient.get 'https://chatbot-api.userlocal.jp/api/chat', { params: { key: ENV['USR_LOCAL_API_KEY'], message: CGI.escape(word) } }
+  response = RestClient.post 'https://api.apigw.smt.docomo.ne.jp/dialogue/v1/dialogue?APIKEY=4848502f6b39545568766a456237393879516f662f786c303742334a6f436e48676537512f7344514a3039', { params: { utt: CGI.escape(word) } }
   response_json = JSON.parse(response)
-  response_json['status'] == "success" ? response_json['result'] : '通信エラー'
+  response_json['utt'].present? ? response_json['utt'] : '通信エラー'
 end
 
 post '/callback' do
