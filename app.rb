@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'line/bot'
 require 'rest-client'
+require 'docomoru'
 
 def client
   @client ||= Line::Bot::Client.new { |config|
@@ -9,10 +10,10 @@ def client
   }
 end
 
-def get_user_local_bot_reply(word)
-  response = RestClient.post 'https://api.apigw.smt.docomo.ne.jp/dialogue/v1/dialogue?APIKEY=4848502f6b39545568766a456237393879516f662f786c303742334a6f436e48676537512f7344514a3039', { params: { utt: CGI.escape(word) } }
-  response_json = JSON.parse(response)
-  response_json['utt'].present? ? response_json['utt'] : '通信エラー'
+def get_docomo_bot_reply(word)
+  client = Docomoru::Client.new(api_key: ENV["DOCOMO_API_KEY"])
+  response = client.create_dialogue(CGI.escape(word), {mode: nil, context: nil})
+  response['utt'].present? ? response['utt'] : '通信エラー'
 end
 
 post '/callback' do
@@ -31,7 +32,7 @@ post '/callback' do
       when Line::Bot::Event::MessageType::Text
         message = {
           type: 'text',
-          text: get_user_local_bot_reply(event.message['text'])
+          text: get_docomo_bot_reply(event.message['text'])
         }
         client.reply_message(event['replyToken'], message)
       when Line::Bot::Event::MessageType::Image, Line::Bot::Event::MessageType::Video
