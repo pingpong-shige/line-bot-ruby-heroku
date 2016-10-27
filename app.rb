@@ -13,7 +13,7 @@ end
 def get_docomo_bot_reply(word)
   client = Docomoru::Client.new(api_key: ENV["DOCOMO_API_KEY"])
   response = client.create_dialogue(CGI.escape(word), {mode: nil, context: nil})
-  response['utt'].present? ? response['utt'] : '通信エラー'
+  response.body['utt'].present? ? response.body['utt'] : '通信エラー'
 end
 
 post '/callback' do
